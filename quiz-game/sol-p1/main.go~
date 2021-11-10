@@ -1,0 +1,71 @@
+package main
+
+import ( 
+	"fmt"
+	"io"
+	"os"
+	"flag"
+	"encoding/csv"
+	"log"
+)
+
+
+type Answer struct {
+	id int
+	response int
+	input string
+	valid bool
+}
+
+func main() {
+	
+	var filename string
+	flag.StringVar(&filename, "CSV Quiz filename", "problems.csv", "Specify full filename for Quiz problems.")
+	flag.Parse()
+
+	fmt.Println("Filename specified: ", filename)
+	
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Close(f)
+
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+	
+	if err != nil {
+	 log.Fatal(err)
+	}
+
+	
+	var userAnswer int
+	var bingo bool
+	var answers []Answer
+	for i, record := range records {
+		fmt.Println(record[0])
+		var userAnswer int
+		fmt.Scanln(&userAnswer)
+		if userAnswer == record[1] {
+			bingo = true
+		} else {
+			bingo = false
+		}
+		answer := Answer{id: i, response: record[1], input: userAnswer, bingo}
+		append(answers, answer)
+	}
+
+	var correct, fail int
+	for ans := range answers {
+	    if ans.valid == true {
+		correct += 1
+	    } else {
+		fail += 0
+	    }
+
+	}
+
+	fmt.Println("Total correct answers: %i", correct)
+	fmt.Println("Total failed answers: %i", fail)
+}
+
